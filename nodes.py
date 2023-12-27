@@ -1,3 +1,8 @@
+import io
+import pyqrcode
+from PIL import Image
+from torchvision.transforms import ToTensor
+
 class CenterCalculationNode:
     @classmethod
     def INPUT_TYPES(s):
@@ -26,10 +31,59 @@ class CenterCalculationNode:
         center_y += y_position * center_y
         return (outer_with, outer_height, inner_with, inner_height, int(center_x), int(center_y), )
 
+
+class CreateQRCodeNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "content": ("STRING", {"default": ""}),
+            },
+            "optional": {
+                "error": (["L", "M", "Q", "H"], {"default": "L"}),
+                "version": ("INT", {"default": 3, "min": 1, "max": 40}),
+                "mode": (["numeric", "alphanumeric", "kanji", "binary"], {"default": "binary"}),
+                "encoding": ("STRING", {"default": "iso-8859-1"}),
+                "scale": ("INT", {"default": 5, "min": 1}),
+                "module_color_R": ("INT", {"default": 0, "min": 0, "max": 255}),
+                "module_color_G": ("INT", {"default": 0, "min": 0, "max": 255}),
+                "module_color_B": ("INT", {"default": 0, "min": 0, "max": 255}),
+                "module_color_A": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "background_R": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "background_G": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "background_B": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "background_A": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "quiet_zone": ("INT", {"default": 4, "min": 0}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", )
+
+    FUNCTION = "create_qr_code"
+
+    CATEGORY = "Calculation"
+
+    def create_qr_code(self, 
+                       content, error, version, mode, encoding, 
+                       scale, module_color_R, module_color_G, module_color_B, module_color_A, 
+                       background_R, background_G, background_B, background_A, quiet_zone):
+        code = pyqrcode.create(content=content, error=error, version=version, mode=mode, encoding=encoding)
+        img_io = io.BytesIO()
+        code.png(img_io, scale=scale, 
+                 module_color=(module_color_R, module_color_G, module_color_B, module_color_A), 
+                 background=(background_R, background_G, background_B, background_A), quiet_zone=quiet_zone)
+        img_io.seek(0)
+        img_tensor = ToTensor()(Image.open(img_io))
+        return (img_tensor, )
+
+
 NODE_CLASS_MAPPINGS = {
-    "CenterCalculation": CenterCalculationNode
+    "CenterCalculation": CenterCalculationNode,
+    "CreateQRCode": CreateQRCodeNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "CenterCalculation": "Center Calculation"
+    "CenterCalculation": "Center Calculation",
+    "CreateQRCode": "Create QR Code",
 }
+
