@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-calculation"
+description = "Nodes: Center Calculation. Improved Numerical Calculation for ComfyUI"
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["pyqrcode", "pypng"]
+
+[project.urls]
+Repository = "https://github.com/Limitex/ComfyUI-Calculation"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-Calculation"
+Icon = ""
